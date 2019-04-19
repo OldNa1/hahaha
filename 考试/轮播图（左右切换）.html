@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			li{
+				list-style: none;
+			}
+			.box{
+				width: 850px;
+				height: 500px;
+				position: relative;
+				margin: 100px auto;
+				overflow: hidden;
+			}
+			.box ul{
+				width: 5950px;
+				height: 500px;
+				position: absolute;
+				left:-850px;
+			}
+			.box ul li{
+				width: 850px;
+				height: 500px;
+				float: left;
+			}
+			.box ol{
+				position: absolute;
+				right: 5%;
+				bottom: 20px;
+				z-index: 2;
+				height: 25px;
+			}
+			.box ol li{
+				width: 25px;
+				height: 25px;
+				line-height: 25px;
+				text-align: center;
+				background: #FFFFFF;
+				margin-left: 5px;
+				float: left;
+				border-radius: 50%;
+				cursor: pointer;
+			}
+			.box ol .ac{
+				background: cyan;
+				color:#FFFFFF;
+			}
+			.box>a{
+				width: 30px;
+				height: 30px;
+				line-height: 25px;
+				text-align: center;
+				text-decoration: none;
+				color: peru;
+				font-size: 30px;
+				position: absolute;
+				top: 50%;
+				margin-top: -15px;
+				z-index: 2;
+				background: rgba(0,0,0,.3);
+			}
+			.box .prev{
+				left: 0;
+			}
+			.box .next{
+				right: 0;
+			}
+		</style>
+		<script src="tools.js">
+			
+		</script>
+	</head>
+	<body>
+		<div class="box">
+			<ul>
+				<li><a href="javascript:alert(4);"><img src="img/5.jpg"/></a></li>
+				<li><a href="javascript:alert(0);"><img src="img/1.jpg"/></a></li>
+				<li><a href="javascript:alert(1);"><img src="img/2.jpg"/></a></li>
+				<li><a href="javascript:alert(2);"><img src="img/3.jpg"/></a></li>
+				<li><a href="javascript:alert(3);"><img src="img/4.jpg"/></a></li>
+				<li><a href="javascript:alert(4);"><img src="img/5.jpg"/></a></li>
+				<li><a href="javascript:alert(0);"><img src="img/1.jpg"/></a></li>
+			</ul>
+			<ol>
+				<li class="ac">1</li>
+				<li>2</li>
+				<li>3</li>
+				<li>4</li>
+				<li>5</li>
+			</ol>
+			<a href="javascript:;" class="prev">&laquo;</a>
+			<a href="javascript:;" class="next">&raquo;</a>
+			<script src="../tools.js"></script>
+		</div>
+		<script type="text/javascript">	
+			//找到需要的所有元素	
+			function lbShow (container) {
+				this.container = document.querySelector(container);
+				this.ul = this.container.querySelector("ul");
+				this.btns = Array.from(this.container.querySelector("ol").children);
+				this.imgs = this.container.querySelector("ul").children;
+				this.prev = this.container.querySelector(".prev");
+				this.next = this.container.querySelector(".next");
+				this.timer = null;
+				this.index = 0;
+				this.lastIndex = 0;
+				this.bindEvents();
+			}
+
+			//绑定事件
+			lbShow.prototype.bindEvents = function () {
+				//给btn绑定事件
+				this.btns.forEach((btn,i) => {
+					//给btn赋予点击事件
+					btn.onclick = () => {
+						this.index = i;
+						//调用图片切换函数
+						this.changeImg();
+					}
+				})
+
+				//给切换上一张图片按钮绑定事件
+				this.prev.onclick = () => {
+					this.index--;
+					//如果下标小于0，返回最后一张图片下标
+					if(this.index < 0){
+						this.index = this.btns.length - 1;
+						this.ul.style.left = - (this.btns.length + 1) * 850 + "px";
+					}
+					//同上
+					this.changeImg();
+				}
+
+				//给切换下一张图片按钮绑定事件
+				this.next.onclick = () => {
+					this.index++;
+					if(this.index === this.btns.length){
+						this.index = 0;
+						this.ul.style.left = 0;
+					}
+					//同上
+					this.changeImg();
+				}
+
+				//绑定自动切换事件
+				lbShow.prototype.autoPlay = () => {
+					//设置自动切换定时器
+					this.timer = setInterval(() => {
+						//调用切换下一张函数
+						this.next.onclick();
+					},2000)
+				}
+				//自动切换
+				this.autoPlay();
+				//鼠标移入的时候清除定时器，使图片不再运动
+				this.container.onmouseenter = () => {
+					clearInterval(this.timer);
+				}
+				//鼠标移除，再次绑定自动切换事件
+				this.container.onmouseleave = this.autoPlay.bind(this);
+			}
+			//绑定图片切换函数
+			lbShow.prototype.changeImg = function () {
+				this.btns[this.lastIndex].classList.remove("ac");
+				this.imgs[this.index].classList.remove("ac");
+				this.lastIndex = this.index;
+				//调用linearMove函数
+				tools.linearMove(this.ul,"left",- (this.index + 1) * 850 , 1000);
+			}
+
+			new lbShow(".box");
+		</script>
+	</body>
+</html>
